@@ -81,14 +81,16 @@ instance MonadError IOError IO where
 
 #if !(MIN_VERSION_base(4,2,1))
 
--- These instances are in base-4.3
+-- These instances are in base-4.3, minus the fail definition and
+-- the Error constraint
 
-instance Monad (Either e) where
+instance (Error e) => Monad (Either e) where
     return        = Right
     Left  l >>= _ = Left l
     Right r >>= k = k r
+    fail msg      = Left (strMsg msg)
 
-instance MonadFix (Either e) where
+instance (Error e) => MonadFix (Either e) where
     mfix f = let
         a = f $ case a of
             Right r -> r
