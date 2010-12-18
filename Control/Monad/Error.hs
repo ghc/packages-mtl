@@ -52,6 +52,7 @@ module Control.Monad.Error (
     -- $ErrorTExample
   ) where
 
+import qualified Control.Exception as Exception
 import Control.Monad
 import Control.Monad.Cont.Class
 import Control.Monad.Error.Class
@@ -70,11 +71,14 @@ import Control.Monad.Instances ()
 --
 instance MonadPlus IO where
     mzero       = ioError (userError "mzero")
-    m `mplus` n = m `catch` \_ -> n
+    m `mplus` n = m `catchIO` \_ -> n
 
 instance MonadError IOError IO where
     throwError = ioError
-    catchError = catch
+    catchError = catchIO
+
+catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
+catchIO = Exception.catch
 
 -- ---------------------------------------------------------------------------
 -- Our parameterizable error monad
